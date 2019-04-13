@@ -20,7 +20,7 @@ public class PassengerManagerV1 : MonoBehaviour
 
     private void Start()
     {
-        WagonCount = wagonManager.wagonCount;
+        WagonCount = wagonManager.wagons.Length;
         PassengerRandomizer();
     }
 

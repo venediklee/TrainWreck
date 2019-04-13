@@ -19,7 +19,7 @@ TagManager:
   - flirt
   - emptySeat
   - husband
-  - 
+  - regularPassenger
   - 
   - 
   - 
@@ -46,4 +46,7 @@ TagManager:
     locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: passengers
+    uniqueID: 1623643239
     locked: 0

@@ -9,8 +9,8 @@ public class WifeManagerV1 : MonoBehaviour
     [SerializeField] FlirtManagerV1 flirtManager;
     [SerializeField] WagonManagerV1 wagonManager;
     [SerializeField] Transform player;
-
-    [HideInInspector] public int wagonIndexWife;
+    public int lastVagonIndex;
+    public int wagonIndexWife;
     public float startX, endX; //direction must change
     public float speed;
     public float wagonLength, estTime, totalTime; //estimated time duration
@@ -22,6 +22,7 @@ public class WifeManagerV1 : MonoBehaviour
     public float wagonDoorDistance;
     void Start()
     {
+        lastVagonIndex = 3;
         estTime = 2 * wagonLength / speed * Random.Range(1.6f, 2.0f);
         targetPos = transform.position;
         totalTime = 0.0f;
@@ -32,32 +33,41 @@ public class WifeManagerV1 : MonoBehaviour
 
     void Update()
     {
-        if(wagonIndexWife==0 && wagonManager.wagonIndexPlayer==0)
+        if (wagonIndexWife == 0 && wagonManager.wagonIndexPlayer == 0)
         {
             return;
         }
-        if(wagonIndexWife==wagonManager.wagonIndexPlayer)
+        if (wagonIndexWife == wagonManager.wagonIndexPlayer)
         {
-            if (player.position.x > transform.position.x && speed < 0)
+            if (transform.position.x != player.position.x)
             {
-                speed *= -1;
+                Debug.Log("BUSTED ");
+                if (player.position.x > transform.position.x && speed < 0)
+                {
+                    speed *= -1;
+                    Debug.Log("�ts on the r�ght ");
+                }
+                if (player.position.x < transform.position.x && speed > 0)
+                {
+                    Debug.Log("ITS ON THE LEFT ");
+                    speed *= -1;
+                }
+                targetPos = new Vector2(transform.position.x + speed * 2, transform.position.y);
+                transform.position = Vector2.MoveTowards(transform.position, targetPos, Mathf.Abs(speed) * Time.deltaTime);
+                //  Debug.Log("position->" + transform.position);
+
             }
-            if (player.position.x < transform.position.x && speed > 0)
-            {
-                speed *= -1;
-            }
-            targetPos = new Vector2(player.position.x + speed * 2, transform.position.y);
-            transform.position = Vector2.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
-            Debug.Log("position->" + transform.position);
+            if (transform.position.x > player.position.x)
+                transform.position = player.position;
         }
         else
         {
             if (transform.position.x < startX)
             {
-                Debug.Log("buraya da girdi");
+                Debug.Log("BUGDETECTED");
                 speed *= -1;
                 transform.localScale = new Vector3(-1 * transform.localScale.x, transform.localScale.y);
-                targetPos = new Vector2(transform.position.x + (transform.position.x - startX) + 0.1f, transform.position.y);
+                targetPos = new Vector2(transform.position.x + (startX - transform.position.x) + 0.5f, transform.position.y);
                 transform.position = targetPos;
 
             }
@@ -65,11 +75,11 @@ public class WifeManagerV1 : MonoBehaviour
             {
                 speed *= -1;
                 transform.localScale = new Vector3(-1 * transform.localScale.x, transform.localScale.y);
-                targetPos = new Vector2(transform.position.x - (transform.position.x - endX) - 0.1f, transform.position.y);
+                targetPos = new Vector2(transform.position.x - (transform.position.x - endX) - 0.5f, transform.position.y);
                 transform.position = targetPos;
 
             }
-            transform.position = Vector2.MoveTowards(transform.position, targetPos, Mathf.Abs(speed) * Time.deltaTime);
+
 
 
             totalTime += Time.deltaTime;
@@ -78,9 +88,9 @@ public class WifeManagerV1 : MonoBehaviour
 
 
                 probabilityOfChange = Random.Range(1, 11);
-                if (probabilityOfChange <= 2)//probability to change direction
+                if (probabilityOfChange <= 9)//probability to change direction
                 {
-
+                    Debug.Log("DECIDED TO CHANGE DIRECTION");
                     whenToChange = Random.Range(2, (int)estTime); //decides when to change direction 
                     totalTime = 0.0f; //makes code wait until whenToChange time for changing direction
                     counter = 1;
@@ -91,18 +101,21 @@ public class WifeManagerV1 : MonoBehaviour
 
             if (estTime < totalTime && counter == 1) //counter prevents to enter this IF until another collision
             {
-
-                speed *= -1; //changes wife's direction      
-                transform.localScale = new Vector3(-1 * transform.localScale.x, transform.localScale.y);
-                counter++; //increasing the counter so code never enters IF until another collision
-                           // totalTime = 0.0f;
-                Debug.Log("YON DEGISTIRILDI");
+                if (!(speed > 0 && wagonIndexWife == 0) && !(speed < 0 && wagonIndexWife == lastVagonIndex))
+                {
+                    speed *= -1; //changes wife's direction      
+                    transform.localScale = new Vector3(-1 * transform.localScale.x, transform.localScale.y);
+                    counter++; //increasing the counter so code never enters IF until another collision
+                    Debug.Log("Direction has changed");
+                }
 
             }
-            
+
             targetPos = new Vector2(transform.position.x + speed, transform.position.y);
+            transform.position = Vector2.MoveTowards(transform.position, targetPos, Mathf.Abs(speed) * Time.deltaTime);
         }
-        
+
+
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -123,18 +136,18 @@ public class WifeManagerV1 : MonoBehaviour
                     Debug.Log("ELSEYE GIRDIIIIII");
                     if (speed < 0)
                     {
-                        targetPos = new Vector2(transform.position.x + -1 * wagonDoorDistance + speed, transform.position.y);
+                        targetPos = new Vector2(transform.position.x + -1 * wagonDoorDistance, transform.position.y);
                         transform.position = targetPos;
                         totalTime = 0.0f;
-                        wagonIndexWife++;
+                        wagonIndexWife--;
                     }
 
                     if (speed > 0)
                     {
-                        targetPos = new Vector2(transform.position.x + wagonDoorDistance + speed, transform.position.y);
+                        targetPos = new Vector2(transform.position.x + wagonDoorDistance, transform.position.y);
                         transform.position = targetPos;
                         totalTime = 0.0f;
-                        wagonIndexWife--;
+                        wagonIndexWife++;
                     }
 
 

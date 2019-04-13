@@ -7,6 +7,8 @@ public class PlayerMovement_v2 : MonoBehaviour
     private Vector2 targetPos;
     public Animator animator;
 
+    [SerializeField] FlirtManagerV1 flirtManager;
+
     void Update()
     {	
 		
@@ -20,6 +22,19 @@ public class PlayerMovement_v2 : MonoBehaviour
             animator.SetInteger("walking", 1);
             targetPos = new Vector2(transform.position.x - 1, transform.position.y);
             transform.position = Vector2.MoveTowards(transform.position, targetPos, 6 * Time.deltaTime);
+            
+            //stop flirt interactions
+            if(flirtManager.isFlirtRoutineRunning==1)
+            {
+                StopCoroutine(flirtManager.activeFlirtRoutine);
+                flirtManager.isFlirtRoutineRunning = 0;
+            }
+            else if (flirtManager.isFlirtRoutineRunning == 2)
+            {
+                StopCoroutine(flirtManager.activeFlirtRoutine);
+                //TODO decrease kiss points we received
+                flirtManager.isFlirtRoutineRunning = 0;
+            }
         }
         else if (Input.GetKey("right") || Input.GetKey("d"))
         {
@@ -30,6 +45,19 @@ public class PlayerMovement_v2 : MonoBehaviour
             animator.SetInteger("walking", 1);
             targetPos = new Vector2(transform.position.x + 1, transform.position.y);
             transform.position = Vector2.MoveTowards(transform.position, targetPos, 6 * Time.deltaTime);
+
+            //stop flirt interactions
+            if (flirtManager.isFlirtRoutineRunning == 1)
+            {
+                StopCoroutine(flirtManager.activeFlirtRoutine);
+                flirtManager.isFlirtRoutineRunning = 0;
+            }
+            else if (flirtManager.isFlirtRoutineRunning == 2)
+            {
+                StopCoroutine(flirtManager.activeFlirtRoutine);
+                //TODO decrease kiss points we received
+                flirtManager.isFlirtRoutineRunning = 0;
+            }
         }
 
         if (Input.GetKeyUp("left") || Input.GetKeyUp("right") || Input.GetKeyUp("a") || Input.GetKeyUp("d"))

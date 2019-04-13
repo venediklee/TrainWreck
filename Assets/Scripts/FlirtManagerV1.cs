@@ -16,9 +16,9 @@ public class FlirtManagerV1 : MonoBehaviour
     [HideInInspector] public int playerVerticalPosition = 0;//0 for corridor, 1 for above seat, -1 for below seat
     
 
-    Coroutine activeFlirtRoutine;
+    [HideInInspector] public Coroutine activeFlirtRoutine;
     //TODO change flirting status on movement
-    [HideInInspector] public bool isFlirtRoutineRunning = false;//used for detecting if a Flirt related coroutine is active 
+    [HideInInspector] public int isFlirtRoutineRunning = 0;//used for detecting if a Flirt related coroutine is active, 0 for not active, 1 for talk, 2 for kiss 
 
     /// <summary>
     /// general flirt interactions
@@ -36,7 +36,8 @@ public class FlirtManagerV1 : MonoBehaviour
 
         if (up + down == 1 && playerVerticalPosition == 0)//interact with what is above or below you
         {
-            if (flirt.collider != null && emptySeat.collider != null && isFlirtRoutineRunning == false)//there is a woman we can flirt
+            Debug.Log("we have vertical input");
+            if (flirt.collider != null && emptySeat.collider != null && isFlirtRoutineRunning == 0)//there is a woman we can flirt
             {
                 //talk to flirt
                 activeFlirtRoutine = StartCoroutine(TalkToFlirt(flirt.collider.GetComponent<FlirtStatsV1>()));
@@ -49,14 +50,12 @@ public class FlirtManagerV1 : MonoBehaviour
             {
                 playerVerticalPosition = (up == 1) ? 1 : -1;
                 //TODO sit in the empty seat GFX
-
-                //TODO dont forget to increase non flirt character count as game progresses
             }
         }
 
         else if (up + down == 1 && playerVerticalPosition == -1)//player is in the below seats
         {
-            if (down == 1 && isFlirtRoutineRunning == false && flirt.collider != null)//kiss the flirt
+            if (down == 1 && isFlirtRoutineRunning == 0 && flirt.collider != null)//kiss the flirt
             {
                 //TODO kiss the flirt GFX
                 activeFlirtRoutine = StartCoroutine(Kiss(flirt.collider.GetComponent<FlirtStatsV1>()));
@@ -65,14 +64,14 @@ public class FlirtManagerV1 : MonoBehaviour
             {
                 //get back to corridor
                 playerVerticalPosition = 0;
-                isFlirtRoutineRunning = false;
+                isFlirtRoutineRunning = 0;
                 StopCoroutine(activeFlirtRoutine);
                 //TODO get back to corridor GFX
             }
         }
         else if (up + down == 1 && playerVerticalPosition == 1)//player is in the above seats
         {
-            if (up == 1 && isFlirtRoutineRunning == false && flirt.collider != null)//kiss the flirt
+            if (up == 1 && isFlirtRoutineRunning == 0 && flirt.collider != null)//kiss the flirt
             {
                 //TODO kiss the flirt GFX
                 activeFlirtRoutine = StartCoroutine(Kiss(flirt.collider.GetComponent<FlirtStatsV1>()));
@@ -81,7 +80,7 @@ public class FlirtManagerV1 : MonoBehaviour
             {
                 //get back to corridor
                 playerVerticalPosition = 0;
-                isFlirtRoutineRunning = false;
+                isFlirtRoutineRunning = 0;
                 StopCoroutine(activeFlirtRoutine);
                 //TODO get back to corridor GFX
             }
@@ -97,7 +96,8 @@ public class FlirtManagerV1 : MonoBehaviour
     /// <returns></returns>
     IEnumerator TalkToFlirt(FlirtStatsV1 fStats)
     {
-        isFlirtRoutineRunning = true;
+        Debug.Log("started flirting");
+        isFlirtRoutineRunning = 1;
         float totalTalkRequired = 5 + 25 * (fStats.flirtDifficulty - 1) / 9;
 
         while (fStats.loveMeter < 100)//while we haven't reached kissing stage
@@ -105,7 +105,8 @@ public class FlirtManagerV1 : MonoBehaviour
             yield return new WaitForEndOfFrame();
             fStats.loveMeter += Time.deltaTime * 100 / totalTalkRequired;
         }
-        isFlirtRoutineRunning = false;
+        Debug.Log("flirt successfull");
+        isFlirtRoutineRunning = 0;
         yield return null;
     }
 
@@ -119,7 +120,7 @@ public class FlirtManagerV1 : MonoBehaviour
     {
         //TODO when we interrupt kissing reduce all the points given
 
-        isFlirtRoutineRunning = true;
+        isFlirtRoutineRunning = 2;
 
         yield return new WaitForEndOfFrame();//wait for new frame to increase points
 
@@ -134,7 +135,7 @@ public class FlirtManagerV1 : MonoBehaviour
         }
         playerStats.kissPoints += kissPoints;
 
-        isFlirtRoutineRunning = false;
+        isFlirtRoutineRunning = 0;
         yield return null;
     }
 
