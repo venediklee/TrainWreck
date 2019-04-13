@@ -19,7 +19,7 @@ public class WagonDoorManagerV1 : MonoBehaviour
         }
         else if(collision.CompareTag("wife"))
         {
-            wifeManager.vagonIndexWife += (isLeftDoor) ? -1 : 1;
+            wifeManager.wagonIndexWife += (isLeftDoor) ? -1 : 1;
         }
     }
     //TODO wagon manager
