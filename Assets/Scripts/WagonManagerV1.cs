@@ -5,7 +5,7 @@ using UnityEngine;
 public class WagonManagerV1 : MonoBehaviour
 {
     //[HideInInspector]
-    public int wagonIndexPlayer = 0;
+    public int wagonIndexPlayer = 1;
     public Transform[] wagons;//used to find seats
     public int wagonCount=2;
 
