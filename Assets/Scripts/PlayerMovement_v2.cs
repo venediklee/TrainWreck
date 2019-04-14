@@ -20,18 +20,19 @@ public class PlayerMovement_v2 : MonoBehaviour
                 transform.localScale = new Vector2(-transform.localScale.x, transform.localScale.y);  // Mirror the sprite (looks left)
             }
             animator.SetInteger("walking", 1);
+            animator.SetInteger("playerLookPos", 0);
             targetPos = new Vector2(transform.position.x - 1, transform.position.y);
             transform.position = Vector2.MoveTowards(transform.position, targetPos, 6 * Time.deltaTime);
             
             //stop flirt interactions
             if(flirtManager.isFlirtRoutineRunning==1)
             {
-                StopCoroutine(flirtManager.activeFlirtRoutine);
+                flirtManager.MyStopCoroutine(flirtManager.activeFlirtRoutine);
                 flirtManager.isFlirtRoutineRunning = 0;
             }
             else if (flirtManager.isFlirtRoutineRunning == 2)
             {
-                StopCoroutine(flirtManager.activeFlirtRoutine);
+                flirtManager.MyStopCoroutine(flirtManager.activeFlirtRoutine);
                 
                 flirtManager.isFlirtRoutineRunning = 0;
             }
@@ -43,18 +44,19 @@ public class PlayerMovement_v2 : MonoBehaviour
                 transform.localScale = new Vector2(-transform.localScale.x, transform.localScale.y);  // Correct the sprite direction (looks right)
             }
             animator.SetInteger("walking", 1);
+            animator.SetInteger("playerLookPos", 0);
             targetPos = new Vector2(transform.position.x + 1, transform.position.y);
             transform.position = Vector2.MoveTowards(transform.position, targetPos, 6 * Time.deltaTime);
 
             //stop flirt interactions
             if (flirtManager.isFlirtRoutineRunning == 1)
             {
-                StopCoroutine(flirtManager.activeFlirtRoutine);
+                flirtManager.MyStopCoroutine(flirtManager.activeFlirtRoutine);
                 flirtManager.isFlirtRoutineRunning = 0;
             }
             else if (flirtManager.isFlirtRoutineRunning == 2)
             {
-                StopCoroutine(flirtManager.activeFlirtRoutine);
+                flirtManager.MyStopCoroutine(flirtManager.activeFlirtRoutine);
                 
                 flirtManager.isFlirtRoutineRunning = 0;
             }

@@ -17,6 +17,4 @@ Animations
 
 
 errors:
-	doesn't make sprites normal after interruption of talk/kiss
-	can flirt through husband
-	
+	sitting to empty seats is partially wrong

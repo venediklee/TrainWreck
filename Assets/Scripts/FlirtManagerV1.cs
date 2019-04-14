@@ -6,28 +6,32 @@ public class FlirtManagerV1 : MonoBehaviour
 {
     [SerializeField] PlayerStatsV1 playerStats;
     [SerializeField] InputManagerV1 inputmanager;
-    
+
     [SerializeField] Transform player;
     [SerializeField] LayerMask flirtMask;//layer of flirts
     //TODO change layer of seats after husband gets up
     [SerializeField] LayerMask emptySeatMask;//layer of empty seats
     [SerializeField] LayerMask husbandMask;//layer of husbands
+    [SerializeField] LayerMask regularPassengerMask;//mask of regular passengers
 
     [HideInInspector] public int playerVerticalPosition = 0;//0 for corridor, 1 for above seat, -1 for below seat
-    
+
 
     [HideInInspector] public Coroutine activeFlirtRoutine;
     [HideInInspector] public int isFlirtRoutineRunning = 0;//used for detecting if a Flirt related coroutine is active, 0 for not active, 1 for talk, 2 for kiss 
 
-    int initialKissPoints=0;//used for holding initial kiss points before starting the kissing
+    int initialKissPoints = 0;//used for holding initial kiss points before starting the kissing
 
     [SerializeField] Sprite flirtIdle, flirtKissDown, flirtKissUp, flirtLookDown, flirtLookUp;
-    [SerializeField] Sprite playerLookUp,playerLookDown;
+    [SerializeField] Sprite playerLookUp, playerLookDown, playerSitting;
 
     [SerializeField] Animator playerAnim;
 
 
     RaycastHit2D flirt, emptySeat, husbandSeat;
+    RaycastHit2D []emptySeats;//used for determining the closest empty seat of the row we are looking
+
+    bool isPlayerSittingInEmptySeat = false;
 
     /// <summary>
     /// general flirt interactions
@@ -46,10 +50,12 @@ public class FlirtManagerV1 : MonoBehaviour
             emptySeat = Physics2D.Raycast(player.transform.position, Vector2.up, 10f * up - 10f * down, emptySeatMask);
             //check if the husband is sitting in the seat next to woman 
             husbandSeat = Physics2D.Raycast(player.transform.position, Vector2.up, 10f * up - 10f * down, emptySeatMask);
+            
 
 
             Debug.Log("we have vertical input");
-            if (flirt.collider != null && emptySeat.collider != null && isFlirtRoutineRunning == 0)//there is a woman we can flirt
+            if (flirt.collider != null && isFlirtRoutineRunning == 0
+                 && emptySeat.collider != null && emptySeat.collider.GetComponent<SeatStats>().hasSpawnedPassenger==false)//there is a woman we can flirt
             {
                 if(flirt.collider.GetComponent<FlirtStatsV1>().loveMeter<100)//talk to flirt
                 {
@@ -58,16 +64,17 @@ public class FlirtManagerV1 : MonoBehaviour
 
                     flirt.collider.GetComponent<SpriteRenderer>().sprite = (down == 1) ? flirtLookDown : flirtLookUp;
 
-                    //TODO have to do this as animation since it changes sprites constantly
+                    
                     playerAnim.SetInteger("playerLookPos", (down == 1) ? -1 : 1);
                 }
                 else//kiss the flirt
                 {
                     Debug.Log("started kissing flirt");
-                    
-                    flirt.collider.GetComponent<SpriteRenderer>().sprite = (down==1)? flirtKissDown : flirtKissUp;
 
-                    //TODO have to do this as animation since it changes sprites constantly
+                    playerAnim.SetInteger("playerLookPos", (down == 1) ? -1 : 1);
+
+                    flirt.collider.GetComponent<SpriteRenderer>().sprite = (down==1)? flirtKissDown : flirtKissUp;
+                    
                     playerAnim.SetBool("playerKiss",true);
                     player.GetComponent<SpriteRenderer>().sprite = null;
 
@@ -83,48 +90,100 @@ public class FlirtManagerV1 : MonoBehaviour
                 Debug.Log("detected husband, not flirting");
                 //TODO give restless sounds
             }
-            else if (flirt.collider == null && husbandSeat.collider == null && emptySeat.collider != null)//there is only empty seats
+            else //if (flirt.collider == null && husbandSeat.collider == null && emptySeat.collider != null)//there is an available empty seat next to a reguler passenger
             {
-                Debug.Log("seats are empty");
-                
-                player.GetComponent<SpriteRenderer>().sprite = null;
-                playerVerticalPosition = (up == 1) ? 1 : -1;
-                player.transform.position += new Vector3(0, (down == 1) ? -1 : 1, 0);
-                //TODO player sit in the empty seat GFX
+                //check if there is a regular passenger there
+                RaycastHit2D[] regularPassengers = Physics2D.RaycastAll(player.transform.position, Vector2.up, 10f * up - 10f * down, regularPassengerMask);
+
+                if(regularPassengers.Length<2)//there are 0 or 1 passengers there, we can sit
+                {
+                    emptySeats = Physics2D.RaycastAll(player.transform.position, Vector2.up, 10f * up - 10f * down, emptySeatMask);
+                    //make the player sit in the first available position
+                    foreach (RaycastHit2D emptySeat in emptySeats)
+                    {
+                        if (emptySeat.collider.GetComponent<SeatStats>().hasSpawnedPassenger == false)//if we can sit there
+                        {
+                            Debug.Log("player sits to empty seat");
+                            emptySeat.collider.GetComponent<SpriteRenderer>().sprite = playerSitting;
+                            isPlayerSittingInEmptySeat = true;
+                            break;
+                        }
+                    }
+                    
+
+                    playerAnim.SetInteger("playerLookPos", (down == 1) ? -1 : 1);//our players looks to the target seat
+                    playerAnim.SetBool("playerKiss", true);//disables player original sprite
+                    playerVerticalPosition = (down == 1) ? -1 : 1;
+                    player.transform.position += new Vector3(0, (down == 1) ? -1 : 1, 0);
+                }
             }
         }
 
         else if (up == 1 && playerVerticalPosition == -1)//player is in the below seats
         {
             //get back to corridor GFX
+            playerAnim.SetInteger("playerLookPos", 0);
+            playerAnim.SetBool("playerKiss", false);
             playerVerticalPosition = 0;
-           
+
             player.transform.position += new Vector3(0, 1, 0);
 
-            if(isFlirtRoutineRunning==2)//if we interrupt kissing
+            if(isPlayerSittingInEmptySeat==true)
+            {
+                emptySeats=Physics2D.RaycastAll(player.transform.position, Vector2.up, 10f * up - 10f * down, emptySeatMask);
+                foreach (RaycastHit2D emptySeat in emptySeats)
+                {
+                    if(emptySeat.collider.GetComponent<SeatStats>().hasSpawnedPassenger==false)//if we can sit there
+                    {
+                        emptySeat.collider.GetComponent<SpriteRenderer>().sprite = null;
+                    }
+                }
+                
+                isPlayerSittingInEmptySeat = false;
+            }
+
+            else if(isFlirtRoutineRunning==2)//if we interrupt kissing
             {
                 //decrease kiss points we received
                 RestoreKissPoints();
 
                 flirt.collider.GetComponent<SpriteRenderer>().sprite = flirtIdle;
-
-                playerAnim.SetInteger("playerLookPos", 0);
-                playerAnim.SetBool("playerKiss", false);
-                playerVerticalPosition = 0;
+                
             }
-            isFlirtRoutineRunning = 0;
-            StopCoroutine(activeFlirtRoutine);            
+            if (isFlirtRoutineRunning > 0)
+            {
+                isFlirtRoutineRunning = 0;
+                StopCoroutine(activeFlirtRoutine);
+            }
         }
         else if (down == 1 && playerVerticalPosition == 1)//player is in the above seats
         {
             //get back to corridor GFX
+            playerAnim.SetInteger("playerLookPos", 0);
+            playerAnim.SetBool("playerKiss", false);
             playerVerticalPosition = 0;
 
-            
+
             player.GetComponent<SpriteRenderer>().sprite = playerLookUp;
             player.transform.position += new Vector3(0, -1, 0);
 
-            if (isFlirtRoutineRunning == 2)//if we interrupt kissing
+
+            if (isPlayerSittingInEmptySeat == true)
+            {
+                Debug.Log("removing players sprite");
+                emptySeats = Physics2D.RaycastAll(player.transform.position, Vector2.up, 10f * up - 10f * down, emptySeatMask);
+                foreach (RaycastHit2D emptySeat in emptySeats)
+                {
+                    if (emptySeat.collider.GetComponent<SeatStats>().hasSpawnedPassenger == false)//if we can sit there
+                    {
+                        emptySeat.collider.GetComponent<SpriteRenderer>().sprite = null;
+                    }
+                }
+
+                isPlayerSittingInEmptySeat = false;
+            }
+
+            else if(isFlirtRoutineRunning == 2)//if we interrupt kissing
             {
                 //decrease kiss points we received
                 RestoreKissPoints();
@@ -133,15 +192,34 @@ public class FlirtManagerV1 : MonoBehaviour
                 //Debug.Log("flirt sprite renderer exists->" + flirt.collider.gameObject.GetComponent<SpriteRenderer>() != null);
                 flirt.collider.GetComponent<SpriteRenderer>().sprite = flirtIdle;
 
-                playerAnim.SetInteger("playerLookPos", 0);
-                playerAnim.SetBool("playerKiss", false);
-                playerVerticalPosition = 0;
+                
             }
 
-            isFlirtRoutineRunning = 0;
-            StopCoroutine(activeFlirtRoutine);
+            if(isFlirtRoutineRunning>0)
+            {
+                isFlirtRoutineRunning = 0;
+                StopCoroutine(activeFlirtRoutine);
+            }
         }
 
+    }
+
+    /// <summary>
+    /// stops coroutines -- can be executed from other scripts
+    /// also resets animation events etc.
+    /// </summary>
+    /// <param name="coroutine"></param>
+    public void MyStopCoroutine(Coroutine coroutine)
+    {
+        playerAnim.SetInteger("playerLookPos", 0);
+        playerAnim.SetBool("playerKiss", false);
+        playerVerticalPosition = 0;
+
+        RestoreKissPoints();
+
+        flirt.collider.GetComponent<SpriteRenderer>().sprite = flirtIdle;
+
+        StopCoroutine(coroutine);
     }
 
     /// <summary>
