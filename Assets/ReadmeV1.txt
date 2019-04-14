@@ -1,6 +1,6 @@
 Scripts
 
-	wagon change(kıvanç)
+	player wagon change(kıvanç)
 	--movement(kıvanç)
 	--sitting(bertay)
 	--sitting interactions(bertay)
@@ -9,7 +9,7 @@ Scripts
 	--kissing(dara)
 	--wife tracking us(bertay)
 	--wife seeing us standing(bertay)
-	passenger randomizer(kıvanç)
+	--passenger randomizer(kıvanç)
 
 Animations
 	ground movement(background)

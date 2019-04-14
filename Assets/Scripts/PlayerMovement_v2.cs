@@ -13,7 +13,7 @@ public class PlayerMovement_v2 : MonoBehaviour
     {	
 		
 		
-        if (Input.GetKey("left") || Input.GetKey("a"))
+        if ((Input.GetKey("left") || Input.GetKey("a")) && flirtManager.playerVerticalPosition == 0)
         {
             if (transform.localScale.x > 0)
             {
@@ -32,11 +32,11 @@ public class PlayerMovement_v2 : MonoBehaviour
             else if (flirtManager.isFlirtRoutineRunning == 2)
             {
                 StopCoroutine(flirtManager.activeFlirtRoutine);
-                //TODO decrease kiss points we received
+                
                 flirtManager.isFlirtRoutineRunning = 0;
             }
         }
-        else if (Input.GetKey("right") || Input.GetKey("d"))
+        else if ((Input.GetKey("right") || Input.GetKey("d")) && flirtManager.playerVerticalPosition==0)
         {
             if (transform.localScale.x < 0)
             {
@@ -55,7 +55,7 @@ public class PlayerMovement_v2 : MonoBehaviour
             else if (flirtManager.isFlirtRoutineRunning == 2)
             {
                 StopCoroutine(flirtManager.activeFlirtRoutine);
-                //TODO decrease kiss points we received
+                
                 flirtManager.isFlirtRoutineRunning = 0;
             }
         }

@@ -17,8 +17,12 @@ public class FlirtManagerV1 : MonoBehaviour
     
 
     [HideInInspector] public Coroutine activeFlirtRoutine;
-    //TODO change flirting status on movement
     [HideInInspector] public int isFlirtRoutineRunning = 0;//used for detecting if a Flirt related coroutine is active, 0 for not active, 1 for talk, 2 for kiss 
+
+    int initialKissPoints=0;//used for holding initial kiss points before starting the kissing
+
+    [SerializeField] Sprite flirtIdle, flirtKissDown, flirtKissUp, flirtLookDown, flirtLookUp;
+    [SerializeField] Sprite playerLookUp,playerLookDown;
 
     /// <summary>
     /// general flirt interactions
@@ -39,8 +43,21 @@ public class FlirtManagerV1 : MonoBehaviour
             Debug.Log("we have vertical input");
             if (flirt.collider != null && emptySeat.collider != null && isFlirtRoutineRunning == 0)//there is a woman we can flirt
             {
-                //talk to flirt
-                activeFlirtRoutine = StartCoroutine(TalkToFlirt(flirt.collider.GetComponent<FlirtStatsV1>()));
+                if(flirt.collider.GetComponent<FlirtStatsV1>().loveMeter<100)//talk to flirt
+                {
+                    activeFlirtRoutine = StartCoroutine(TalkToFlirt(flirt.collider.GetComponent<FlirtStatsV1>()));
+                }
+                else//kiss the flirt
+                {
+                    flirt.collider.GetComponent<SpriteRenderer>().sprite = (down==1)? flirtKissDown : flirtKissUp;
+
+                    player.GetComponent<SpriteRenderer>().sprite = null;
+                    playerVerticalPosition = (down == 1) ? -1 : 1;
+                    player.transform.position += new Vector3(0, (down == 1) ? -1 : 1, 0);
+
+                    initialKissPoints = playerStats.kissPoints;
+                    activeFlirtRoutine = StartCoroutine(Kiss(flirt.collider.GetComponent<FlirtStatsV1>()));
+                }
             }
             else if (flirt.collider != null && husbandSeat.collider != null)//there is a woman we can flirt but the husband is in the way
             {
@@ -48,46 +65,94 @@ public class FlirtManagerV1 : MonoBehaviour
             }
             else if (flirt.collider == null && husbandSeat.collider == null && emptySeat.collider != null)//there is only empty seats
             {
+                player.GetComponent<SpriteRenderer>().sprite = null;
                 playerVerticalPosition = (up == 1) ? 1 : -1;
+                player.transform.position += new Vector3(0, (down == 1) ? -1 : 1, 0);
                 //TODO sit in the empty seat GFX
             }
         }
 
-        else if (up + down == 1 && playerVerticalPosition == -1)//player is in the below seats
+        else if (up == 1 && playerVerticalPosition == -1)//player is in the below seats
         {
-            if (down == 1 && isFlirtRoutineRunning == 0 && flirt.collider != null)//kiss the flirt
+            //get back to corridor GFX
+            playerVerticalPosition = 0;
+            player.GetComponent<SpriteRenderer>().sprite = playerLookDown;
+            player.transform.position += new Vector3(0, 1, 0);
+
+            if(isFlirtRoutineRunning==2)//if we interrupt kissing
             {
-                //TODO kiss the flirt GFX
-                activeFlirtRoutine = StartCoroutine(Kiss(flirt.collider.GetComponent<FlirtStatsV1>()));
+                //decrease kiss points we received
+                RestoreKissPoints();
             }
-            else// if(up==1)
-            {
-                //get back to corridor
-                playerVerticalPosition = 0;
-                isFlirtRoutineRunning = 0;
-                StopCoroutine(activeFlirtRoutine);
-                //TODO get back to corridor GFX
-            }
+            isFlirtRoutineRunning = 0;
+            StopCoroutine(activeFlirtRoutine);            
         }
-        else if (up + down == 1 && playerVerticalPosition == 1)//player is in the above seats
+        else if (down == 1 && playerVerticalPosition == 1)//player is in the above seats
         {
-            if (up == 1 && isFlirtRoutineRunning == 0 && flirt.collider != null)//kiss the flirt
+            //get back to corridor GFX
+            playerVerticalPosition = 0;
+            player.GetComponent<SpriteRenderer>().sprite = playerLookUp;
+            player.transform.position += new Vector3(0, -1, 0);
+
+            if (isFlirtRoutineRunning == 2)//if we interrupt kissing
             {
-                //TODO kiss the flirt GFX
-                activeFlirtRoutine = StartCoroutine(Kiss(flirt.collider.GetComponent<FlirtStatsV1>()));
+                //decrease kiss points we received
+                RestoreKissPoints();
             }
-            else// if (down == 1)
-            {
-                //get back to corridor
-                playerVerticalPosition = 0;
-                isFlirtRoutineRunning = 0;
-                StopCoroutine(activeFlirtRoutine);
-                //TODO get back to corridor GFX
-            }
+
+            isFlirtRoutineRunning = 0;
+            StopCoroutine(activeFlirtRoutine);
         }
 
     }
 
+    /// <summary>
+    /// changes old sprite(s) to new sprite(s) over time
+    /// </summary>
+    /// <param name="spRenderer"></param>
+    /// <param name="newSprite"></param>
+    /// <param name="oldSprite"></param>
+    /// <param name="spRenderer2"></param>
+    /// <param name="newSprite2"></param>
+    /// <param name="oldSprite2"></param>
+    /// <returns></returns>
+    //////IEnumerator SpriteChanger(SpriteRenderer spRenderer,Sprite newSprite, Sprite oldSprite,
+    //////                        SpriteRenderer spRenderer2=null, Sprite newSprite2 = null, Sprite oldSprite2 = null)
+    //////{
+    //////    float changeTime = 0.1f;
+    //////    Color tempClr = spRenderer.color;
+    //////    while(changeTime>0)//fade the old sprite
+    //////    {
+    //////        changeTime -= Time.deltaTime;
+    //////        tempClr.a = changeTime / 0.1f;
+    //////        spRenderer.color = tempClr;
+    //////    }
+
+    //////    spRenderer.sprite = newSprite;
+    //////    tempClr.a = 1;
+    //////    spRenderer.color = tempClr;
+    //////    changeTime = 0.1f;
+        
+    //////    while (changeTime > 0)//fade in the new sprite
+    //////    {
+    //////        changeTime -= Time.deltaTime;
+    //////        tempClr.a = (0.1f-changeTime )/ 0.1f;
+    //////        spRenderer.color = tempClr;
+    //////    }
+    //////    tempClr.a = 1f;
+    //////    spRenderer.color = tempClr;
+
+    //////    yield return null;
+    //////}
+
+    /// <summary>
+    /// restores kiss points after an interrupted kiss sequence
+    /// </summary>
+    public void RestoreKissPoints()
+    {
+        playerStats.kissPoints = initialKissPoints;
+        //TODO GFX
+    }
 
     /// <summary>
     /// Talks to the flirt over time, lasts 5-30 seconds depending on difficulty
@@ -118,8 +183,6 @@ public class FlirtManagerV1 : MonoBehaviour
     /// <returns></returns>
     IEnumerator Kiss(FlirtStatsV1 fstats)
     {
-        //TODO when we interrupt kissing reduce all the points given
-
         isFlirtRoutineRunning = 2;
 
         yield return new WaitForEndOfFrame();//wait for new frame to increase points
