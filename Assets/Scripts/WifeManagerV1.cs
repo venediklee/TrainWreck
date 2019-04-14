@@ -4,68 +4,86 @@ using UnityEngine;
 
 public class WifeManagerV1 : MonoBehaviour
 {
-    //TODO check if husband is standing or sitting at same wagon!!
-    //TODO 20% probabiliy
     [SerializeField] FlirtManagerV1 flirtManager;
     [SerializeField] WagonManagerV1 wagonManager;
     [SerializeField] Transform player;
-
+    public int lastVagonIndex;
     public int wagonIndexWife;
-    public float startX, endX; //direction must change
+    public float startX, endX; //train'S first and last point
     public float speed;
-    public float wagonLength, estTime, totalTime; //estimated time duration
+    public float wagonLength, estTime, totalTime;
     private Vector2 targetPos;
-    [HideInInspector] public bool collided = false;//used for trigger effects of wagon doors
+    [HideInInspector] public bool collided = false;
     [HideInInspector] public bool busted;
-    [HideInInspector] int counter;
-    [HideInInspector] public int probabilityOfChange, whenToChange;
-    public float wagonDoorDistance;
+    [HideInInspector] int counter; //counter prevents us to go in 102's if statement, without it 102's if will work always
+    [HideInInspector] public int probabilityOfChange;
+    public float wagonDoorDistance; //distances btwn last door of current wagon and first door of next wagon
     void Start()
     {
+        lastVagonIndex = 3; //TODO CHANGE BEFORE LAST VERSION
         estTime = 2 * wagonLength / speed * Random.Range(1.6f, 2.0f);
         targetPos = transform.position;
         totalTime = 0.0f;
         counter = 0;
-        whenToChange = -1;
         wagonIndexWife = 0;
     }
 
     void Update()
     {
-        if(wagonIndexWife==0 && wagonManager.wagonIndexPlayer==0)
+        if (wagonIndexWife == 0 && wagonManager.wagonIndexPlayer == 0)
         {
             return;
         }
-        if(wagonIndexWife==wagonManager.wagonIndexPlayer)
+        if (wagonIndexWife == wagonManager.wagonIndexPlayer && flirtManager.playerVerticalPosition == 0)
         {
-            if (transform.position.x != player.position.x)
+            Debug.Log("Indexes are equal and Player is standing.")
+            if (transform.position.x != player.position.x)//if player's position is different from wife's, this provides us to follow player
             {
-                Debug.Log("BUSTED ");
-            if (player.position.x > transform.position.x && speed < 0)
+
+                if (player.position.x > transform.position.x && speed < 0)
+                {
+                    speed *= -1;
+                    transform.localScale=new Vector2(-1*transform.localScale.x,transform.localScale.y)
+                    
+                    transform.position = Vector2.MoveTowards(transform.position, player.position, 2*Mathf.Abs(speed) * Time.deltaTime);
+
+                }else 
+                if (player.position.x > transform.position.x && speed > 0)
+                {
+                    transform.position = Vector2.MoveTowards(transform.position, player.position, 2 * Mathf.Abs(speed) * Time.deltaTime);
+                }
+                if (player.position.x < transform.position.x && speed > 0)
+                {
+
+                    speed *= -1;
+                    transform.localScale = new Vector2(-1 * transform.localScale.x, transform.localScale.y)
+                    transform.position = Vector2.MoveTowards(transform.position, player.position, 2 * Mathf.Abs(speed) * Time.deltaTime);
+                }
+                else if (player.position.x < transform.position.x && speed < 0)
+                {
+                    transform.position = Vector2.MoveTowards(transform.position, player.position, 2 * Mathf.Abs(speed) * Time.deltaTime);
+                }
+               
+
+
+            }
+            if (transform.position.x == player.position.x)
             {
-                speed *= -1;
-                Debug.Log("ýts on the rýght ");
+                return;
             }
-            if (player.position.x < transform.position.x && speed > 0)
-            {
-                Debug.Log("ITS ON THE LEFT ");
-                speed *= -1;
-            }
-            targetPos = new Vector2(transform.position.x+ speed * 2, transform.position.y);
-            transform.position = Vector2.MoveTowards(transform.position, targetPos, Mathf.Abs(speed) * Time.deltaTime);
-            //  Debug.Log("position->" + transform.position);
-            
-        }if(transform.position.x>player.position.x)
-                transform.position = player.position;
-            }
+
+
+
+
+        }
         else
         {
-            if (transform.position.x < startX)
+            if (transform.position.x < startX) //prevents wife to go left of train's first point
             {
-                Debug.Log("BUGDETECTED");
+
                 speed *= -1;
                 transform.localScale = new Vector3(-1 * transform.localScale.x, transform.localScale.y);
-                targetPos = new Vector2(transform.position.x + (startX-transform.position.x) + 0.5f, transform.position.y);
+                targetPos = new Vector2(transform.position.x + (startX - transform.position.x) + 0.5f, transform.position.y);
                 transform.position = targetPos;
 
             }
@@ -77,7 +95,7 @@ public class WifeManagerV1 : MonoBehaviour
                 transform.position = targetPos;
 
             }
-            
+
 
 
             totalTime += Time.deltaTime;
@@ -86,12 +104,10 @@ public class WifeManagerV1 : MonoBehaviour
 
 
                 probabilityOfChange = Random.Range(1, 11);
-                if (probabilityOfChange <= 9)//probability to change direction
+                if (probabilityOfChange <= 2)//probability to change direction
                 {
-                    Debug.Log("DECIDED TO CHANGE DIRECTION");
-                    whenToChange = Random.Range(2, (int)estTime); //decides when to change direction 
-                    totalTime = 0.0f; //makes code wait until whenToChange time for changing direction
-                    counter = 1;
+                    counter = 1; //initilaizes counter
+                    Debug.Log("Wife decided to change direction.");
                 }
                 collided = false;
             }
@@ -99,30 +115,32 @@ public class WifeManagerV1 : MonoBehaviour
 
             if (estTime < totalTime && counter == 1) //counter prevents to enter this IF until another collision
             {
-
-                speed *= -1; //changes wife's direction      
-                transform.localScale = new Vector3(-1 * transform.localScale.x, transform.localScale.y);
-                counter++; //increasing the counter so code never enters IF until another collision
-                           // totalTime = 0.0f;
-                Debug.Log("YON DEGISTIRILDI");
+                if (!(speed > 0 && wagonIndexWife == 0) && !(speed < 0 && wagonIndexWife == lastVagonIndex))
+                {
+                    speed *= -1; //changes wife's direction      
+                    transform.localScale = new Vector3(-1 * transform.localScale.x, transform.localScale.y);
+                    counter++; //increasing the counter so code never enters IF until another collision
+                    Debug.Log("Direction has changed");
+                }
 
             }
-            
+
             targetPos = new Vector2(transform.position.x + speed, transform.position.y);
             transform.position = Vector2.MoveTowards(transform.position, targetPos, Mathf.Abs(speed) * Time.deltaTime);
         }
 
-        
+
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("colllllllllided");
+        Debug.Log("Collision detected");
         if (collision.CompareTag("wagonDoor"))
         {
             if (estTime > totalTime)
             {
                 speed *= -1;
                 transform.localScale = new Vector3(-1 * transform.localScale.x, transform.localScale.y);
+                Debug.Log("Face turned to other door");
 
 
             }
@@ -130,26 +148,28 @@ public class WifeManagerV1 : MonoBehaviour
             {
                 if (transform.position.x != startX || transform.position.x != endX)
                 {
-                    Debug.Log("ELSEYE GIRDIIIIII");
-                    if (speed < 0)
+
+                    if (speed < 0 && wagonIndexWife != 0)
                     {
-                        targetPos = new Vector2(transform.position.x + -1 * wagonDoorDistance , transform.position.y);
+                        targetPos = new Vector2(transform.position.x + -1 * wagonDoorDistance, transform.position.y);
                         transform.position = targetPos;
                         totalTime = 0.0f;
                         wagonIndexWife--;
+                        Debug.Log("Wife entered to LEFT WAGON");
                     }
 
-                    if (speed > 0)
+                    if (speed > 0 && wagonIndexWife != lastVagonIndex)
                     {
-                        targetPos = new Vector2(transform.position.x + wagonDoorDistance , transform.position.y);
+                        targetPos = new Vector2(transform.position.x + wagonDoorDistance, transform.position.y);
                         transform.position = targetPos;
                         totalTime = 0.0f;
                         wagonIndexWife++;
+                        Debug.Log("Wife entered to RIGHT WAGON");
                     }
 
 
                     collided = true;
-                    estTime = 2 * wagonLength / Mathf.Abs(speed) * Random.Range(1.1f, 2.2f);
+                    estTime = 2 * wagonLength / Mathf.Abs(speed) * Random.Range(1.6f, 2.0f);
 
                 }
 
