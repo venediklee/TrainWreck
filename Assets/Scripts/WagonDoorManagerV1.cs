@@ -5,7 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class WagonDoorManagerV1 : MonoBehaviour
 {
-    [SerializeField] bool isLeftDoor;
+    public bool isLeftDoor;
 
     [SerializeField] WagonManagerV1 wagonManager;
     

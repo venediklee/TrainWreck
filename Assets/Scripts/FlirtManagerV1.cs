@@ -45,12 +45,20 @@ public class FlirtManagerV1 : MonoBehaviour
             {
                 if(flirt.collider.GetComponent<FlirtStatsV1>().loveMeter<100)//talk to flirt
                 {
+                    Debug.Log("started talking with flirt");
                     activeFlirtRoutine = StartCoroutine(TalkToFlirt(flirt.collider.GetComponent<FlirtStatsV1>()));
+
+                    flirt.collider.GetComponent<SpriteRenderer>().sprite = (down == 1) ? flirtLookDown : flirtLookUp;
+
+                    //TODO have to do this as animation since it changes sprites constantly
+                    player.GetComponent<SpriteRenderer>().sprite = (down == 1) ? playerLookDown : playerLookUp;
                 }
                 else//kiss the flirt
                 {
-                    flirt.collider.GetComponent<SpriteRenderer>().sprite = (down==1)? flirtKissDown : flirtKissUp;
+                    Debug.Log("started kissing flirt");
 
+                    flirt.collider.GetComponent<SpriteRenderer>().sprite = (down==1)? flirtKissDown : flirtKissUp;
+                    //TODO have to do this as animation since it changes sprites constantly
                     player.GetComponent<SpriteRenderer>().sprite = null;
                     playerVerticalPosition = (down == 1) ? -1 : 1;
                     player.transform.position += new Vector3(0, (down == 1) ? -1 : 1, 0);
@@ -61,14 +69,17 @@ public class FlirtManagerV1 : MonoBehaviour
             }
             else if (flirt.collider != null && husbandSeat.collider != null)//there is a woman we can flirt but the husband is in the way
             {
+                Debug.Log("detected husband, not flirting");
                 //TODO give restless sounds
             }
             else if (flirt.collider == null && husbandSeat.collider == null && emptySeat.collider != null)//there is only empty seats
             {
+                Debug.Log("seats are empty");
+                //TODO have to do this as animation since it changes sprites constantly
                 player.GetComponent<SpriteRenderer>().sprite = null;
                 playerVerticalPosition = (up == 1) ? 1 : -1;
                 player.transform.position += new Vector3(0, (down == 1) ? -1 : 1, 0);
-                //TODO sit in the empty seat GFX
+                //TODO player sit in the empty seat GFX
             }
         }
 
@@ -76,6 +87,7 @@ public class FlirtManagerV1 : MonoBehaviour
         {
             //get back to corridor GFX
             playerVerticalPosition = 0;
+            //TODO have to do this as animation since it changes sprites constantly
             player.GetComponent<SpriteRenderer>().sprite = playerLookDown;
             player.transform.position += new Vector3(0, 1, 0);
 
@@ -91,6 +103,7 @@ public class FlirtManagerV1 : MonoBehaviour
         {
             //get back to corridor GFX
             playerVerticalPosition = 0;
+            //TODO have to do this as animation since it changes sprites constantly
             player.GetComponent<SpriteRenderer>().sprite = playerLookUp;
             player.transform.position += new Vector3(0, -1, 0);
 

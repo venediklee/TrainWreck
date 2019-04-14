@@ -34,28 +34,44 @@ public class WifeManagerV1 : MonoBehaviour
         {
             return;
         }
-        if (wagonIndexWife == wagonManager.wagonIndexPlayer && flirtManager.playerVerticalPosition==0)
+        if (wagonIndexWife == wagonManager.wagonIndexPlayer && flirtManager.playerVerticalPosition == 0)
         {
+            Debug.Log("Indexes are equal and Player is standing.");
             if (transform.position.x != player.position.x)//if player's position is different from wife's, this provides us to follow player
             {
-                
+
                 if (player.position.x > transform.position.x && speed < 0)
                 {
                     speed *= -1;
-                    
+                    transform.localScale = new Vector2(-1 * transform.localScale.x, transform.localScale.y);
+
+
+                    transform.position = Vector2.MoveTowards(transform.position, player.position, 2 * Mathf.Abs(speed) * Time.deltaTime);
+
+                }
+                else
+                if (player.position.x > transform.position.x && speed > 0)
+                {
+                    transform.position = Vector2.MoveTowards(transform.position, player.position, 2 * Mathf.Abs(speed) * Time.deltaTime);
                 }
                 if (player.position.x < transform.position.x && speed > 0)
                 {
-                    
-                    speed *= -1;
-                }
-                targetPos = new Vector2(transform.position.x + speed * 2, transform.position.y);
-                transform.position = Vector2.MoveTowards(transform.position, targetPos, Mathf.Abs(speed) * Time.deltaTime);
-               
 
+                    speed *= -1;
+                    transform.localScale = new Vector2(-1 * transform.localScale.x, transform.localScale.y);
+                    transform.position = Vector2.MoveTowards(transform.position, player.position, 2 * Mathf.Abs(speed) * Time.deltaTime);
+                }
+                else if (player.position.x < transform.position.x && speed < 0)
+                {
+                    transform.position = Vector2.MoveTowards(transform.position, player.position, 2 * Mathf.Abs(speed) * Time.deltaTime);
+                }
+                
             }
-            if (transform.position.x > player.position.x)//prevents wife to pass away player
-                transform.position = player.position;
+            if (transform.position.x == player.position.x)
+            {
+                return;
+            }
+            
         }
         else
         {

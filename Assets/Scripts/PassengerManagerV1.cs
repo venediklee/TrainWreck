@@ -15,12 +15,13 @@ public class PassengerManagerV1 : MonoBehaviour
     [SerializeField] GameObject flirtPrefab;
     [SerializeField] GameObject husbandPrefab;
     [SerializeField] GameObject[] regularPassengersPrefabs;
-    [SerializeField] GameObject oldManPrefab;
-    [SerializeField] GameObject oldWomanPrefab;
+    //[SerializeField] GameObject oldManPrefab;
+    //[SerializeField] GameObject oldWomanPrefab;
 
     private void Start()
     {
         WagonCount = wagonManager.wagons.Length;
+        Debug.Assert(WagonCount > 1);//or div by zero
         PassengerRandomizer();
     }
 
@@ -34,8 +35,8 @@ public class PassengerManagerV1 : MonoBehaviour
     {
         for (int currentWagon = 0; currentWagon < WagonCount; currentWagon++)
         {
-            seats = Physics2D.OverlapCircleAll(wagonManager.wagons[currentWagon].position, 65f, emptySeats);//get all seats near the wagon
-
+            seats = Physics2D.OverlapCircleAll(wagonManager.wagons[currentWagon].position, 29f, emptySeats);//get all seats near the wagon
+            Debug.Log("detected " + seats.Length + " seats in this wagon");
             foreach (Collider2D seat in seats)
             {
                 if(UnityEngine.Random.value<0.7f+currentWagon/(WagonCount-1)*0.3f)
@@ -53,32 +54,54 @@ public class PassengerManagerV1 : MonoBehaviour
                                                     (seat.GetComponent<SeatStats>().index - 1);
                         Collider2D husbandSeat = Array.Find(seats, 
                                                 element => element.GetComponent<SeatStats>().index == husbandSeatIndex );
-                        if(husbandSeat.GetComponent<SeatStats>().hasSpawnedPassenger==true)//if corridor side seat has a passenger
+                        if(seats[husbandSeatIndex].GetComponent<SeatStats>().hasSpawnedPassenger==true)//if corridor side seat has a passenger
                         {
                             //dont spawn anything just pass
+                            Debug.Log("can't spawn flirt & husband since husbands seat is occupied");
                             continue;
                         }
                         else
                         {
                             //spawn flirt
-                            Instantiate(flirtPrefab, seat.transform);
+                            GameObject obj = Instantiate(flirtPrefab, seat.transform);
+                            obj.GetComponent<SeatStats>().index = seat.GetComponent<SeatStats>().index;
+                            obj.GetComponent<SeatStats>().hasSpawnedPassenger = true;
+                            obj.GetComponent<SpriteRenderer>().sortingOrder = (obj.GetComponent<SeatStats>().index % 4 == 3) ? 9 : 102;
                             //spawn husband
-                            Instantiate(husbandPrefab, husbandSeat.transform);
+                            obj = Instantiate(husbandPrefab, husbandSeat.transform);
+                            obj.GetComponent<SeatStats>().index = husbandSeatIndex;
+                            obj.GetComponent<SeatStats>().hasSpawnedPassenger = true;
+                            obj.GetComponent<SpriteRenderer>().sortingOrder = (husbandSeatIndex % 4 == 1) ? 101 : 10;
+
+                            //set seat spesific spawn records
+                            seat.GetComponent<SeatStats>().hasSpawnedPassenger = true;
+                            seats[husbandSeatIndex].GetComponent<SeatStats>().hasSpawnedPassenger = true;
+                            husbandSeat.GetComponent<SeatStats>().hasSpawnedPassenger = true;
                         }
 
                     }
 
-                    else if(randPassenger<=0.3f)//spawn elder woman
-                    {
-                        Instantiate(oldWomanPrefab, seat.transform);
-                    }
-                    else if(randPassenger<=0.4f)//spawn elder man
-                    {
-                        Instantiate(oldManPrefab, seat.transform);
-                    }
+                    //else if(randPassenger<=0.3f)//spawn elder woman
+                    //{
+                    //    Instantiate(oldWomanPrefab, seat.transform);
+                    //}
+                    //else if(randPassenger<=0.4f)//spawn elder man
+                    //{
+                    //    Instantiate(oldManPrefab, seat.transform);
+                    //}
                     else//spawn regular passenger
                     {
                         int regularPassengerIndex = UnityEngine.Random.Range(0, regularPassengersPrefabs.Length);
+                        GameObject obj = Instantiate(regularPassengersPrefabs[regularPassengerIndex], seat.transform);
+                        obj.GetComponent<SeatStats>().index = seat.GetComponent<SeatStats>().index;
+                        obj.GetComponent<SeatStats>().hasSpawnedPassenger = true;
+                        if (obj.GetComponent<SeatStats>().index % 4 == 3) obj.GetComponent<SpriteRenderer>().sortingOrder = 9;
+                        else if (obj.GetComponent<SeatStats>().index % 4 == 2) obj.GetComponent<SpriteRenderer>().sortingOrder = 10;
+                        else if (obj.GetComponent<SeatStats>().index % 4 == 1) obj.GetComponent<SpriteRenderer>().sortingOrder = 101;
+                        else obj.GetComponent<SpriteRenderer>().sortingOrder= 102;
+
+                        //set seat spesific spawn records
+                        seat.GetComponent<SeatStats>().hasSpawnedPassenger = true;
                     }
                     
                 }
