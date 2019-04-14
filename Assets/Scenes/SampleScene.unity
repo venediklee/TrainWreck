@@ -454,6 +454,8 @@ GameObject:
   - component: {fileID: 396956418}
   - component: {fileID: 396956417}
   - component: {fileID: 396956420}
+  - component: {fileID: 396956413}
+  - component: {fileID: 396956422}
   m_Layer: 0
   m_Name: player
   m_TagString: player
@@ -461,6 +463,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &396956413
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396956412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff9454b37ec2a974aa8d13713d21fb69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  wifeManager: {fileID: 1378841021}
 --- !u!212 &396956414
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -496,10 +511,10 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: d3f1407a6306f8749af312f426c9a3c1, type: 3}
+  m_SortingLayerID: 1623643239
+  m_SortingLayer: 1
+  m_SortingOrder: 12
+  m_Sprite: {fileID: 21300000, guid: 3e2d4d9e93f1a1c45916ad67a3cf805c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -536,7 +551,7 @@ CapsuleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.1, y: 0}
@@ -604,6 +619,7 @@ MonoBehaviour:
   flirtLookUp: {fileID: 21300000, guid: acd9975ff6dd3e54db595b072f5d6ede, type: 3}
   playerLookUp: {fileID: 21300000, guid: 3e2d4d9e93f1a1c45916ad67a3cf805c, type: 3}
   playerLookDown: {fileID: 21300000, guid: 74cbc0770c5775c4da54dfab48c96e58, type: 3}
+  playerAnim: {fileID: 396956421}
 --- !u!114 &396956420
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -639,6 +655,27 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!50 &396956422
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396956412}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -715,7 +752,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 40.3, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -807,6 +844,7 @@ MonoBehaviour:
     type: 3}
   regularPassengersPrefabs:
   - {fileID: 5120254233311459175, guid: 14fab291833fdda40bae6d00da91d529, type: 3}
+  - {fileID: 5120254233311459175, guid: 6a3c37c94c988784d9a9e09741097ac9, type: 3}
 --- !u!4 &1085821934
 Transform:
   m_ObjectHideFlags: 0
@@ -950,7 +988,7 @@ MonoBehaviour:
   collided: 0
   busted: 0
   probabilityOfChange: 0
-  wagonDoorDistance: 25
+  wagonDoorDistance: 16
 --- !u!50 &1378841022
 Rigidbody2D:
   serializedVersion: 4
@@ -1302,6 +1340,26 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6277486390286341916, guid: 56a2637f5b071b949b94dfa89d3c5b63,
+        type: 3}
+      propertyPath: m_SortingLayerID
+      value: 1623643239
+      objectReference: {fileID: 0}
+    - target: {fileID: 6277486390286341916, guid: 56a2637f5b071b949b94dfa89d3c5b63,
+        type: 3}
+      propertyPath: m_SortingLayer
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6277486390286341916, guid: 56a2637f5b071b949b94dfa89d3c5b63,
+        type: 3}
+      propertyPath: m_SortingOrder
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 6277486390286341916, guid: 56a2637f5b071b949b94dfa89d3c5b63,
+        type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6277486390286341917, guid: 56a2637f5b071b949b94dfa89d3c5b63,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1356,6 +1414,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6277486390286341858, guid: 56a2637f5b071b949b94dfa89d3c5b63,
+        type: 3}
+      propertyPath: m_UsedByEffector
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6277486390286341858, guid: 56a2637f5b071b949b94dfa89d3c5b63,
+        type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 56a2637f5b071b949b94dfa89d3c5b63, type: 3}
@@ -1464,7 +1532,7 @@ PrefabInstance:
     - target: {fileID: 6346523224017188751, guid: 89958a29367e3734d9f0c6ecb7771365,
         type: 3}
       propertyPath: wagonDoorDistance
-      value: 25
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 6346523224017188751, guid: 89958a29367e3734d9f0c6ecb7771365,
         type: 3}

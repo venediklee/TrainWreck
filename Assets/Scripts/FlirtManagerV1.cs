@@ -24,6 +24,11 @@ public class FlirtManagerV1 : MonoBehaviour
     [SerializeField] Sprite flirtIdle, flirtKissDown, flirtKissUp, flirtLookDown, flirtLookUp;
     [SerializeField] Sprite playerLookUp,playerLookDown;
 
+    [SerializeField] Animator playerAnim;
+
+
+    RaycastHit2D flirt, emptySeat, husbandSeat;
+
     /// <summary>
     /// general flirt interactions
     /// </summary>
@@ -31,15 +36,18 @@ public class FlirtManagerV1 : MonoBehaviour
     /// <param name="down">key press</param>
     public void FlirtInteractions(int up, int down)
     {
-        //check if there is a woman in the above seats
-        RaycastHit2D flirt = Physics2D.Raycast(player.transform.position, Vector2.up, 20f * up - 20f * down, flirtMask);
-        //check if the seat next to the woman is empty
-        RaycastHit2D emptySeat = Physics2D.Raycast(player.transform.position, Vector2.up, 10f * up - 10f * down, emptySeatMask);
-        //check if the husband is sitting in the seat next to woman 
-        RaycastHit2D husbandSeat = Physics2D.Raycast(player.transform.position, Vector2.up, 10f * up - 10f * down, emptySeatMask);
+        
 
         if (up + down == 1 && playerVerticalPosition == 0)//interact with what is above or below you
         {
+            //check if there is a woman in the above seats
+            flirt = Physics2D.Raycast(player.transform.position, Vector2.up, 20f * up - 20f * down, flirtMask);
+            //check if the seat next to the woman is empty
+            emptySeat = Physics2D.Raycast(player.transform.position, Vector2.up, 10f * up - 10f * down, emptySeatMask);
+            //check if the husband is sitting in the seat next to woman 
+            husbandSeat = Physics2D.Raycast(player.transform.position, Vector2.up, 10f * up - 10f * down, emptySeatMask);
+
+
             Debug.Log("we have vertical input");
             if (flirt.collider != null && emptySeat.collider != null && isFlirtRoutineRunning == 0)//there is a woman we can flirt
             {
@@ -51,15 +59,18 @@ public class FlirtManagerV1 : MonoBehaviour
                     flirt.collider.GetComponent<SpriteRenderer>().sprite = (down == 1) ? flirtLookDown : flirtLookUp;
 
                     //TODO have to do this as animation since it changes sprites constantly
-                    player.GetComponent<SpriteRenderer>().sprite = (down == 1) ? playerLookDown : playerLookUp;
+                    playerAnim.SetInteger("playerLookPos", (down == 1) ? -1 : 1);
                 }
                 else//kiss the flirt
                 {
                     Debug.Log("started kissing flirt");
-
+                    
                     flirt.collider.GetComponent<SpriteRenderer>().sprite = (down==1)? flirtKissDown : flirtKissUp;
+
                     //TODO have to do this as animation since it changes sprites constantly
+                    playerAnim.SetBool("playerKiss",true);
                     player.GetComponent<SpriteRenderer>().sprite = null;
+
                     playerVerticalPosition = (down == 1) ? -1 : 1;
                     player.transform.position += new Vector3(0, (down == 1) ? -1 : 1, 0);
 
@@ -75,7 +86,7 @@ public class FlirtManagerV1 : MonoBehaviour
             else if (flirt.collider == null && husbandSeat.collider == null && emptySeat.collider != null)//there is only empty seats
             {
                 Debug.Log("seats are empty");
-                //TODO have to do this as animation since it changes sprites constantly
+                
                 player.GetComponent<SpriteRenderer>().sprite = null;
                 playerVerticalPosition = (up == 1) ? 1 : -1;
                 player.transform.position += new Vector3(0, (down == 1) ? -1 : 1, 0);
@@ -87,14 +98,19 @@ public class FlirtManagerV1 : MonoBehaviour
         {
             //get back to corridor GFX
             playerVerticalPosition = 0;
-            //TODO have to do this as animation since it changes sprites constantly
-            player.GetComponent<SpriteRenderer>().sprite = playerLookDown;
+           
             player.transform.position += new Vector3(0, 1, 0);
 
             if(isFlirtRoutineRunning==2)//if we interrupt kissing
             {
                 //decrease kiss points we received
                 RestoreKissPoints();
+
+                flirt.collider.GetComponent<SpriteRenderer>().sprite = flirtIdle;
+
+                playerAnim.SetInteger("playerLookPos", 0);
+                playerAnim.SetBool("playerKiss", false);
+                playerVerticalPosition = 0;
             }
             isFlirtRoutineRunning = 0;
             StopCoroutine(activeFlirtRoutine);            
@@ -103,7 +119,8 @@ public class FlirtManagerV1 : MonoBehaviour
         {
             //get back to corridor GFX
             playerVerticalPosition = 0;
-            //TODO have to do this as animation since it changes sprites constantly
+
+            
             player.GetComponent<SpriteRenderer>().sprite = playerLookUp;
             player.transform.position += new Vector3(0, -1, 0);
 
@@ -111,6 +128,14 @@ public class FlirtManagerV1 : MonoBehaviour
             {
                 //decrease kiss points we received
                 RestoreKissPoints();
+
+                Debug.Log("flirt collider exists->" + flirt.collider != null);
+                //Debug.Log("flirt sprite renderer exists->" + flirt.collider.gameObject.GetComponent<SpriteRenderer>() != null);
+                flirt.collider.GetComponent<SpriteRenderer>().sprite = flirtIdle;
+
+                playerAnim.SetInteger("playerLookPos", 0);
+                playerAnim.SetBool("playerKiss", false);
+                playerVerticalPosition = 0;
             }
 
             isFlirtRoutineRunning = 0;
@@ -209,8 +234,14 @@ public class FlirtManagerV1 : MonoBehaviour
             fstats.remainingKissPoints -= (int)0.1f / 5 * kissPoints;//wait time / total time * original total points
             //TODO point GFX
         }
+        
+
         playerStats.kissPoints += kissPoints;
 
+        //reset anim etc. values
+        playerAnim.SetBool("playerKiss", false);
+        playerAnim.SetFloat("playerLookPos", 0);
+        playerVerticalPosition = 0;
         isFlirtRoutineRunning = 0;
         yield return null;
     }

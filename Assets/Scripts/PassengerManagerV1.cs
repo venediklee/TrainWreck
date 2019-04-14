@@ -54,7 +54,11 @@ public class PassengerManagerV1 : MonoBehaviour
                                                     (seat.GetComponent<SeatStats>().index - 1);
                         Collider2D husbandSeat = Array.Find(seats, 
                                                 element => element.GetComponent<SeatStats>().index == husbandSeatIndex );
-                        if(seats[husbandSeatIndex].GetComponent<SeatStats>().hasSpawnedPassenger==true)//if corridor side seat has a passenger
+                        //Debug.Log("flirt seat index->" + seat.GetComponent<SeatStats>().index);
+                        //Debug.Log("husband seat index->" + husbandSeatIndex);
+                        //Debug.Log("seats[husbandSI].index->" + seats[husbandSeatIndex].GetComponent<SeatStats>().index);
+                        //if(husbandSeat!=null) Debug.Log("husband seat index== husband seat?->" + (seats[husbandSeatIndex] == husbandSeat));
+                        if(husbandSeat.GetComponent<SeatStats>().hasSpawnedPassenger==true)//if corridor side seat has a passenger
                         {
                             //dont spawn anything just pass
                             Debug.Log("can't spawn flirt & husband since husbands seat is occupied");
@@ -92,6 +96,12 @@ public class PassengerManagerV1 : MonoBehaviour
                     else//spawn regular passenger
                     {
                         int regularPassengerIndex = UnityEngine.Random.Range(0, regularPassengersPrefabs.Length);
+                        if(seat.GetComponent<SeatStats>().hasSpawnedPassenger==true)
+                        {
+                            //dont spawn anything new
+                            continue;
+                        }
+
                         GameObject obj = Instantiate(regularPassengersPrefabs[regularPassengerIndex], seat.transform);
                         obj.GetComponent<SeatStats>().index = seat.GetComponent<SeatStats>().index;
                         obj.GetComponent<SeatStats>().hasSpawnedPassenger = true;
@@ -106,6 +116,11 @@ public class PassengerManagerV1 : MonoBehaviour
                     
                 }
                 
+            }
+
+            foreach (Collider2D seat in seats)
+            {
+                //remove any 
             }
         }
     }

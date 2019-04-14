@@ -1,6 +1,6 @@
 Scripts
 
-	player wagon change(kıvanç)
+	--player wagon change(kıvanç)
 	--movement(kıvanç)
 	--sitting(bertay)
 	--sitting interactions(bertay)
@@ -13,3 +13,10 @@ Scripts
 
 Animations
 	ground movement(background)
+
+
+
+errors:
+	doesn't make sprites normal after interruption of talk/kiss
+	can flirt through husband
+	
