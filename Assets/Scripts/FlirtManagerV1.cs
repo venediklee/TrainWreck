@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class FlirtManagerV1 : MonoBehaviour
@@ -33,6 +34,8 @@ public class FlirtManagerV1 : MonoBehaviour
 
     bool isPlayerSittingInEmptySeat = false;
 
+    [SerializeField] AudioManager audioManager;
+
     /// <summary>
     /// general flirt interactions
     /// </summary>
@@ -59,6 +62,8 @@ public class FlirtManagerV1 : MonoBehaviour
             {
                 if(flirt.collider.GetComponent<FlirtStatsV1>().loveMeter<100)//talk to flirt
                 {
+                    audioManager.Play("flirt");
+
                     Debug.Log("started talking with flirt");
                     activeFlirtRoutine = StartCoroutine(TalkToFlirt(flirt.collider.GetComponent<FlirtStatsV1>()));
 
@@ -69,6 +74,9 @@ public class FlirtManagerV1 : MonoBehaviour
                 }
                 else//kiss the flirt
                 {
+                    //TODO add kiss sound named kiss
+                    //audioManager.Play("kiss");
+
                     Debug.Log("started kissing flirt");
 
                     playerAnim.SetInteger("playerLookPos", (down == 1) ? -1 : 1);
@@ -90,7 +98,7 @@ public class FlirtManagerV1 : MonoBehaviour
                 Debug.Log("detected husband, not flirting");
                 //TODO give restless sounds
             }
-            else //if (flirt.collider == null && husbandSeat.collider == null && emptySeat.collider != null)//there is an available empty seat next to a reguler passenger
+            else// if (flirt.collider == null)// && husbandSeat.collider == null && emptySeat.collider != null)//there is an available empty seat next to a reguler passenger
             {
                 //check if there is a regular passenger there
                 RaycastHit2D[] regularPassengers = Physics2D.RaycastAll(player.transform.position, Vector2.up, 10f * up - 10f * down, regularPassengerMask);
@@ -98,23 +106,32 @@ public class FlirtManagerV1 : MonoBehaviour
                 if(regularPassengers.Length<2)//there are 0 or 1 passengers there, we can sit
                 {
                     emptySeats = Physics2D.RaycastAll(player.transform.position, Vector2.up, 10f * up - 10f * down, emptySeatMask);
-                    //make the player sit in the first available position
-                    foreach (RaycastHit2D emptySeat in emptySeats)
+                    flirt = Physics2D.Raycast(player.transform.position, Vector2.up, 20f * up - 20f * down, flirtMask);
+                    if (emptySeats.Length>0 && flirt.collider==null)
                     {
-                        if (emptySeat.collider.GetComponent<SeatStats>().hasSpawnedPassenger == false)//if we can sit there
+                        Debug.Log("found " + emptySeats.Length + "many empty layer seats");
+                        //make the player sit in the first available position
+                        foreach (RaycastHit2D emptySeat in emptySeats)
                         {
-                            Debug.Log("player sits to empty seat");
-                            emptySeat.collider.GetComponent<SpriteRenderer>().sprite = playerSitting;
-                            isPlayerSittingInEmptySeat = true;
-                            break;
+                            if (emptySeat.collider.GetComponent<SeatStats>().hasSpawnedPassenger == false)//if we can sit there
+                            {
+                                Debug.Log("player sits to empty seat");
+                                emptySeat.collider.GetComponent<SpriteRenderer>().sprite = playerSitting;
+                                isPlayerSittingInEmptySeat = true;
+
+                                playerAnim.SetInteger("playerLookPos", (down == 1) ? -1 : 1);//our players looks to the target seat
+                                playerAnim.SetBool("playerKiss", true);//disables player original sprite
+                                playerVerticalPosition = (down == 1) ? -1 : 1;
+                                player.transform.position += new Vector3(0, (down == 1) ? -1 : 1, 0);
+
+                                break;
+                            }
                         }
+
+                        
                     }
                     
-
-                    playerAnim.SetInteger("playerLookPos", (down == 1) ? -1 : 1);//our players looks to the target seat
-                    playerAnim.SetBool("playerKiss", true);//disables player original sprite
-                    playerVerticalPosition = (down == 1) ? -1 : 1;
-                    player.transform.position += new Vector3(0, (down == 1) ? -1 : 1, 0);
+                    
                 }
             }
         }
@@ -130,7 +147,7 @@ public class FlirtManagerV1 : MonoBehaviour
 
             if(isPlayerSittingInEmptySeat==true)
             {
-                emptySeats=Physics2D.RaycastAll(player.transform.position, Vector2.up, 10f * up - 10f * down, emptySeatMask);
+                emptySeats=Physics2D.RaycastAll(player.transform.position, Vector2.up, -10f * up + 10f * down, emptySeatMask);
                 foreach (RaycastHit2D emptySeat in emptySeats)
                 {
                     if(emptySeat.collider.GetComponent<SeatStats>().hasSpawnedPassenger==false)//if we can sit there
@@ -144,6 +161,8 @@ public class FlirtManagerV1 : MonoBehaviour
 
             else if(isFlirtRoutineRunning==2)//if we interrupt kissing
             {
+                audioManager.Stop("kiss");
+
                 //decrease kiss points we received
                 RestoreKissPoints();
 
@@ -171,13 +190,14 @@ public class FlirtManagerV1 : MonoBehaviour
             if (isPlayerSittingInEmptySeat == true)
             {
                 Debug.Log("removing players sprite");
-                emptySeats = Physics2D.RaycastAll(player.transform.position, Vector2.up, 10f * up - 10f * down, emptySeatMask);
+                emptySeats = Physics2D.RaycastAll(player.transform.position, Vector2.up, -10f * up + 10f * down, emptySeatMask);
+                Debug.Log("found " + emptySeats.Length + "many seats");
                 foreach (RaycastHit2D emptySeat in emptySeats)
                 {
-                    if (emptySeat.collider.GetComponent<SeatStats>().hasSpawnedPassenger == false)//if we can sit there
-                    {
+                    //if (emptySeat.collider.GetComponent<SeatStats>().hasSpawnedPassenger == false)//if we can sit there
+                    //{
                         emptySeat.collider.GetComponent<SpriteRenderer>().sprite = null;
-                    }
+                    //}
                 }
 
                 isPlayerSittingInEmptySeat = false;

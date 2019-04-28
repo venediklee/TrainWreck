@@ -11,10 +11,16 @@ Scripts
 	--wife seeing us standing(bertay)
 	--passenger randomizer(kıvanç)
 
+	--husband walk, detect, punch
+	--husband walking animation
+	--player face(healthbar)
+	camera movement
+	main menu
+	credits
+
+
 Animations
-	ground movement(background)
 
 
 
 errors:
-	sitting to empty seats is partially wrong

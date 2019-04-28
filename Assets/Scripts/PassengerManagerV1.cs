@@ -79,8 +79,12 @@ public class PassengerManagerV1 : MonoBehaviour
 
                             //set seat spesific spawn records
                             seat.GetComponent<SeatStats>().hasSpawnedPassenger = true;
-                            seats[husbandSeatIndex].GetComponent<SeatStats>().hasSpawnedPassenger = true;
+                            //seats[husbandSeatIndex].GetComponent<SeatStats>().hasSpawnedPassenger = true;
                             husbandSeat.GetComponent<SeatStats>().hasSpawnedPassenger = true;
+                            //set other dependants
+                            obj.GetComponent<HusbandManager>().husbandSeatDir= (husbandSeatIndex % 4 == 1) ?-1 : 1;
+                            obj.GetComponent<HusbandManager>().husbandSeatPos = husbandSeat.transform.position;
+                            obj.GetComponent<HusbandManager>().husbandsSeat = husbandSeat.GetComponent<SeatStats>();
                         }
 
                     }

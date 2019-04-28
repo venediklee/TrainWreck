@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 4682401664406891317}
   - component: {fileID: 4682401664406891319}
   - component: {fileID: 4682401664406891318}
+  - component: {fileID: 2251350428196613302}
+  - component: {fileID: 1394301488}
   m_Layer: 10
   m_Name: Husband
   m_TagString: Untagged
@@ -26,7 +28,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4682401664406891315}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.8, y: 0.8, z: 1}
   m_Children: []
@@ -111,3 +113,43 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   index: 6
   hasSpawnedPassenger: 0
+--- !u!114 &2251350428196613302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4682401664406891315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b30f32e8be1038f4cb3faf8db84d1ed1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  husbandsSeat: {fileID: 0}
+  husbandSeatPos: {x: 0, y: 0}
+  husbandSeatDir: 0
+  speed: 7
+  wagonDoorLayer:
+    serializedVersion: 2
+    m_Bits: 4096
+  husbandIdle: {fileID: 21300000, guid: e7633c4ff06cd6b44b18dbc4b546ecde, type: 3}
+  animator: {fileID: 1394301488}
+--- !u!95 &1394301488
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4682401664406891315}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 4c0b62905255cec4a9d39bc4628508e6, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0

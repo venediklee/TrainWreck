@@ -160,6 +160,7 @@ MonoBehaviour:
   playerLookDown: {fileID: 21300000, guid: 74cbc0770c5775c4da54dfab48c96e58, type: 3}
   playerSitting: {fileID: 21300000, guid: e3300bd3491800e42bf57829c684ad8b, type: 3}
   playerAnim: {fileID: 259094317935202174}
+  audioManager: {fileID: 0}
 --- !u!114 &259094317935202169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -186,6 +187,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   kissPoints: 0
+  healthPoints: 3
+  UIFace: {fileID: 0}
+  faceDamage1: {fileID: 21300000, guid: 733f6a411dad4ca46888bacc6dd29891, type: 3}
+  faceDamage2: {fileID: 21300000, guid: f89b83fcc61dbf44b980f79de2fcee95, type: 3}
+  faceDamage3: {fileID: 21300000, guid: 3aac614d9f1213649a7133fcc5d1b1ca, type: 3}
 --- !u!114 &259094317935202175
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -213,6 +219,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   wifeManager: {fileID: 0}
+  husbandLayer:
+    serializedVersion: 2
+    m_Bits: 1024
 --- !u!50 &259094317935202173
 Rigidbody2D:
   serializedVersion: 4
